@@ -3,7 +3,7 @@ import torch
 from .SimulatorUtils import get_select_query_func, update_posterior, update_posterior_logistic
 from tqdm import tqdm
 class Simulator:
-    def __init__(self, dataset, model, keyphrase_embeddings, item_keyphrase_matrix, sim_conf,alpha):
+    def __init__(self, dataset, model, keyphrase_embeddings, item_keyphrase_matrix, sim_conf, alpha=0):
         self.dataset = dataset
         self.model = model
         self.keyphrase_embeddings = keyphrase_embeddings
@@ -125,67 +125,67 @@ class Simulator:
 
         return result
 
-    def simulate_user_hr_logistic(self, user_id, target_item_id, alpha):
-        result = {_k:[] for _k in self.k}
-        asked_queries = [] # store indexes of keyphrase asked in prevous step to avoid redundant query
-        mu, S = self.get_mu_S(user_id)
-        #prec_y = np.array(np.linalg.norm(0.01/(S+1e-6)))
-        
-
-        #neg = np.min(mu.T @ self.keyphrase_embeddings.T)
-        #pos = np.max(mu.T @ self.keyphrase_embeddings.T)
-        _, relevant_keyphrases = np.nonzero(self.item_keyphrase_matrix[target_item_id])
-        #print(relevant_keyphrases)
-
-        # initial hr
-        pred_sorted_items, _ = self.get_user_preds_using_mu(mu, user_id)
-        top_item = pred_sorted_items[:10]
-        
-        for _k in self.k:
-            result[_k].append(hr_k(pred_sorted_items,target_item_id, _k))
-        
-        for j in range(1, self.steps+1):
-            # for each step:
-            #   1. system queries
-            #   2. get user response
-            #   3. update user belief
-            #   4. compute HR
-
-            #generate query candidates
-            sorted_query_candidates = self.select_query(
-                item_keyphrase_matrix=self.item_keyphrase_matrix,
-                items = top_item,
-                target_item = target_item_id
-                )
-            #remove redundant queries
-            reduns = np.isin(sorted_query_candidates, asked_queries).nonzero()[0]
-            #query_idx = relevant_keyphrases[j-1]
-            query_idx = np.delete(sorted_query_candidates, reduns)[0]
-            #print(query_idx)
-            #query embedding
-            x = self.keyphrase_embeddings[query_idx][:,np.newaxis]
-            
-            #get user response
-            s = np.random.uniform()
-            if s < self.response_noise:
-                y = 1.0 if np.random.uniform() > 0.5 else 0.0
-            else:
-                y = 1.0 if np.isin(query_idx, relevant_keyphrases) else 0.0
-            
-            prec_y = self.pos_prec if y == 1.0 else self.neg_prec 
-            #update user belief
-            mu, S =  update_posterior_logistic(x, y, mu, S, prec_y, alpha)
-
-            #new HR
-            pred_sorted_items, _ = self.get_user_preds_using_mu(mu, user_id)
-            top_item = pred_sorted_items[:10]
-            
-            for _k in self.k:
-                result[_k].append(hr_k(pred_sorted_items,target_item_id, _k))
-
-            asked_queries.append(query_idx)
-
-        return result
+    # def simulate_user_hr_logistic(self, user_id, target_item_id, alpha):
+    #     result = {_k:[] for _k in self.k}
+    #     asked_queries = [] # store indexes of keyphrase asked in prevous step to avoid redundant query
+    #     mu, S = self.get_mu_S(user_id)
+    #     #prec_y = np.array(np.linalg.norm(0.01/(S+1e-6)))
+    #
+    #
+    #     #neg = np.min(mu.T @ self.keyphrase_embeddings.T)
+    #     #pos = np.max(mu.T @ self.keyphrase_embeddings.T)
+    #     _, relevant_keyphrases = np.nonzero(self.item_keyphrase_matrix[target_item_id])
+    #     #print(relevant_keyphrases)
+    #
+    #     # initial hr
+    #     pred_sorted_items, _ = self.get_user_preds_using_mu(mu, user_id)
+    #     top_item = pred_sorted_items[:10]
+    #
+    #     for _k in self.k:
+    #         result[_k].append(hr_k(pred_sorted_items,target_item_id, _k))
+    #
+    #     for j in range(1, self.steps+1):
+    #         # for each step:
+    #         #   1. system queries
+    #         #   2. get user response
+    #         #   3. update user belief
+    #         #   4. compute HR
+    #
+    #         #generate query candidates
+    #         sorted_query_candidates = self.select_query(
+    #             item_keyphrase_matrix=self.item_keyphrase_matrix,
+    #             items = top_item,
+    #             target_item = target_item_id
+    #             )
+    #         #remove redundant queries
+    #         reduns = np.isin(sorted_query_candidates, asked_queries).nonzero()[0]
+    #         #query_idx = relevant_keyphrases[j-1]
+    #         query_idx = np.delete(sorted_query_candidates, reduns)[0]
+    #         #print(query_idx)
+    #         #query embedding
+    #         x = self.keyphrase_embeddings[query_idx][:,np.newaxis]
+    #
+    #         #get user response
+    #         s = np.random.uniform()
+    #         if s < self.response_noise:
+    #             y = 1.0 if np.random.uniform() > 0.5 else 0.0
+    #         else:
+    #             y = 1.0 if np.isin(query_idx, relevant_keyphrases) else 0.0
+    #
+    #         prec_y = self.pos_prec if y == 1.0 else self.neg_prec
+    #         #update user belief
+    #         mu, S =  update_posterior_logistic(x, y, mu, S, prec_y, alpha)
+    #
+    #         #new HR
+    #         pred_sorted_items, _ = self.get_user_preds_using_mu(mu, user_id)
+    #         top_item = pred_sorted_items[:10]
+    #
+    #         for _k in self.k:
+    #             result[_k].append(hr_k(pred_sorted_items,target_item_id, _k))
+    #
+    #         asked_queries.append(query_idx)
+    #
+    #     return result
 
 
     def get_user_preds_using_mu(self, user_mu, user_id=None):

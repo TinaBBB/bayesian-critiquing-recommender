@@ -79,9 +79,6 @@ class VAEmultilayer(BaseModel):
     def logvar2std(self, logvar):
         return torch.exp(0.5 * logvar)  # sigmod 
 
-
-
-
     def train_one_epoch(self, dataset, optimizer, batch_size, verbose):
         self.train()
 

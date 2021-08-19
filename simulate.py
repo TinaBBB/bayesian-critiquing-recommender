@@ -1,5 +1,4 @@
 from comet_ml import Experiment
-
 import os
 import numpy as np
 import argparse
@@ -54,7 +53,7 @@ if __name__ == "__main__":
     keyphrase_embeddings = k.get_all_mean_kav(20, 20)
 
 
-    s = Simulator(dataset, model, keyphrase_embeddings, dataset.train_item_keyphrase_matrix, conf, alpha)
+    s = Simulator(dataset, model, keyphrase_embeddings, dataset.train_item_keyphrase_matrix, conf)
     r = s.simulate_hr()
 
     save_dir = MODEL_PATH / p.data_name / (p.data_dir + '-' + p.conf.split(".")[0] + '.csv')

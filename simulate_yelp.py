@@ -56,7 +56,7 @@ if __name__ == "__main__":
     #experiment = Experiment(project_name=project_name)
     #experiment.log_parameters(conf)
     dataset.train_item_keyphrase_matrix[dataset.train_item_keyphrase_matrix<20] = 0
-    s = Simulator(dataset, model, keyphrase_embeddings, dataset.train_item_keyphrase_matrix, conf, alpha)
+    s = Simulator(dataset, model, keyphrase_embeddings, dataset.train_item_keyphrase_matrix, conf)
     r = s.simulate_hr()
 
 
