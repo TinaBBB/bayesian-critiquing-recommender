@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 module load python/3.7
-source ~/ENV/bin/activate
+source ~/vae_uncertainty/bin/activate
 
-cd /home/hojin/projects/def-ssanner/hojin/vae-pe
+cd /home/tinashen/projects/def-ssanner/tinashen/bayesian-critiquing-recommender
+
 #cd ~/code/vae-pe
 python simulate.py --saved_model VAE_beta_multilayer.pt --data_name ml10 --data_dir fold3 --conf sim_abs_diff_neg1_noise5.config
