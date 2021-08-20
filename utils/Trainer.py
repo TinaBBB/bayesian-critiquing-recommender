@@ -1,6 +1,9 @@
 import time
+
 import torch
+
 from utils.Table import Table
+
 
 class Trainer:
     def __init__(self, dataset, model, evaluator, logger, conf):
@@ -27,7 +30,7 @@ class Trainer:
     def train(self):
         self.logger.info(self.conf)
         if len(list(self.model.parameters())) > 0:
-            optimizer = torch.optim.Adam(self.model.parameters(), self.lr, weight_decay = self.conf.weight_decay)
+            optimizer = torch.optim.Adam(self.model.parameters(), self.lr, weight_decay=self.conf.weight_decay)
         else:
             optimizer = None
         score_table = Table(table_name='Scores')
@@ -40,18 +43,24 @@ class Trainer:
 
             # evaluate
             if (not self.skip_eval and epoch % 10 == 0) or (self.skip_eval and epoch == self.num_epochs):
-                score = self.evaluate()
-                score = {"RMSE": score}
+                if self.skip_eval:
+                    rec_score = self.evaluate(mse_only=False, ndcg_only=False)
+                else:
+                    rec_score = self.evaluate(mse_only=False, ndcg_only=True)
+
+                score = {"RMSE": rec_score['RMSE'],
+                         "NDCG": rec_score['NDCG'][0]}
                 score_str = ' '.join(['%s=%.4f' % (m, score[m]) for m in score])
                 epoch_elapsed = time.time() - epoch_start
                 self.logger.info('[Epoch %3d/%3d, epoch time: %.2f, train_time: %.2f] loss = %.4f, %s' % (
-                epoch, self.num_epochs, epoch_elapsed, train_elapsed, loss, score_str))
+                    epoch, self.num_epochs, epoch_elapsed, train_elapsed, loss, score_str))
 
                 # update if ...
                 standard = 'RMSE'
                 if self.best_score is None or score[standard] < self.best_score[standard]:
                     self.best_epoch = epoch
                     self.best_score = score
+                    self.best_rec_score = rec_score
                     self.best_params = self.model.parameters()
                     self.endure = 0
                 else:
@@ -64,6 +73,6 @@ class Trainer:
         score_table.add_row('Best at epoch %d' % self.best_epoch, self.best_score)
         self.logger.info(score_table.to_string())
 
-    def evaluate(self):
-        score = self.evaluator.evaluate(self.model, self.dataset, self.test_batch_size)
+    def evaluate(self, mse_only, ndcg_only):
+        score = self.evaluator.evaluate(self.model, self.dataset, self.test_batch_size, mse_only, ndcg_only)
         return score

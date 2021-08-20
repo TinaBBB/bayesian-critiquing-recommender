@@ -157,5 +157,19 @@ class VAEmultilayer(BaseModel):
         
         return total_preds, total_ys
 
+    # unmasked forward prediction, for ranking metric performance evaluation
+    def simple_predict(self, input_matrix):
+        '''
+        Args:
+            input_matrix: a input UI matrix
+        Returns:
+            pred_matrix: a predicted UI matrix
+        '''
+        with torch.no_grad():
+            input_batch_matrix = torch.FloatTensor(input_matrix.toarray()).to(self.device)
+            pred_batch_matrix = self.forward(input_batch_matrix).cpu().numpy()
+
+        return pred_batch_matrix
+
 def gaussian_nll(mu, log_sigma, x):
     return 0.5 * torch.pow((x - mu) / log_sigma.exp(), 2) + log_sigma + 0.5 * np.log(2 * np.pi)

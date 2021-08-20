@@ -30,7 +30,7 @@ def fit(experiment, model_name, dataset, log_dir, device, skip_eval):
     model_base = getattr(models, model_name)
     model = model_base(conf, dataset.num_users, dataset.num_items, device)
     
-    evaluator = Evaluator()
+    evaluator = Evaluator(rec_atK=[5, 10, 15, 20, 50])
     logger = Logger(log_dir)
     logger.info(conf)
     logger.info(dataset)

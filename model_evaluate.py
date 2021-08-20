@@ -30,7 +30,7 @@ def fit(experiment, model_name, dataset, log_dir, device, skip_eval):
     model_base = getattr(models, model_name)
     model = model_base(conf, dataset.num_users, dataset.num_items, device)
     
-    evaluator = Evaluator()
+    evaluator = Evaluator(rec_atK=[5, 10, 15, 20, 50])
     logger = Logger(log_dir)
     logger.info(conf)
     logger.info(dataset)
@@ -44,7 +44,7 @@ def fit(experiment, model_name, dataset, log_dir, device, skip_eval):
     )
 
     trainer.train()
-    return (trainer.best_score['RMSE'], trainer.best_epoch)
+    return (trainer.best_score['RMSE'], trainer.best_epoch, trainer.best_rec_score)
 
 if __name__ == "__main__":
 
@@ -68,6 +68,7 @@ if __name__ == "__main__":
         conf = json.load(f)
     project_name = p.data_name + '-' + 'test'
 
+    # evaluate through different folds
     for data_dir in glob.glob(str(folds_data_dir)):
         fold = int(data_dir.split('/')[-1][len('fold'):])
         dataset = Dataset(data_dir=data_dir)
@@ -81,7 +82,7 @@ if __name__ == "__main__":
         experiment = Experiment(project_name=project_name)
         experiment.log_parameters(conf)
 
-        rmse, epoch = fit(experiment, p.model_name, dataset, log_dir, device, skip_eval=True) 
+        rmse, epoch, rec_score = fit(experiment, p.model_name, dataset, log_dir, device, skip_eval=True)
         experiment.log_metric("rmse", rmse)
         experiment.log_metric("epoch", epoch)
         experiment.log_others({
@@ -94,6 +95,8 @@ if __name__ == "__main__":
             'fold': fold,
             'rmse': rmse                
         }
+
+        result_dict.update(rec_score)
         experiment.end()
 
         df = df.append(result_dict, ignore_index=True)
