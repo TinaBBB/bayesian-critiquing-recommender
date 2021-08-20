@@ -3,5 +3,5 @@ module load python/3.7
 source ~/vae_uncertainty/bin/activate
 
 cd /home/tinashen/projects/def-ssanner/tinashen/bayesian-critiquing-recommender
-#cd ~/code/vae-pe
-python simulate_yelp.py --saved_model VAE_beta_multilayer.pt --data_name yelp --data_dir fold0 --conf sim_abs_diff_neg1_noise0.config
+
+python model_evaluate.py --model_name VAEmultilayer --data_name ml10 --log_dir VAE_beta_multilayer --conf VAE_beta_multilayer.config
