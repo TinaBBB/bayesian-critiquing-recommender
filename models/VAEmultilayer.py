@@ -23,6 +23,7 @@ class VAEmultilayer(BaseModel):
         self.encoder = nn.ModuleList()
         self.encoder.append(nn.Linear(self.num_items, self.hidden_dim*4))
         self.encoder.append(nn.Tanh())
+        # self.encoder.append(nn.ReLU())
         self.encoder.append(nn.Linear(self.hidden_dim*4, self.hidden_dim*2))
         for layer in self.encoder:
             if 'weight' in dir(layer):
@@ -108,12 +109,13 @@ class VAEmultilayer(BaseModel):
             pred_matrix, kl_loss = self.forward(batch_matrix)
 
             # Gaussian log-likelihood loss
-            mask = batch_matrix != 0
+            # mask = batch_matrix != 0
             log_sigma = torch.zeros([], device=pred_matrix.device)
-            recon_loss = torch.sum(gaussian_nll(pred_matrix, log_sigma, batch_matrix) * mask)            
+            recon_loss = torch.sum(gaussian_nll(pred_matrix, log_sigma, batch_matrix))# * mask)
             
             # vae loss with annealing
-            batch_loss = (recon_loss + kl_loss * self.anneal) / torch.sum(mask)
+            # batch_loss = (recon_loss + kl_loss * self.anneal) / torch.sum(mask)
+            batch_loss = (recon_loss + kl_loss * self.anneal) / len(batch_matrix.nonzero()[0])
 
             batch_loss.backward()
             optimizer.step()

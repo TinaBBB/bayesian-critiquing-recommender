@@ -20,9 +20,11 @@ class Dataset:
         
         with open(Path(data_path)/'tr_data.pkl', 'rb') as f:
             train_matrix = pickle.load(f)
+            train_matrix[train_matrix > 5] = 5
 
         with open(Path(data_path)/'te_data.pkl', 'rb') as f:
             test_matrix = pickle.load(f)
+            test_matrix[test_matrix > 5] = 5
 
         return train_matrix, test_matrix
 
