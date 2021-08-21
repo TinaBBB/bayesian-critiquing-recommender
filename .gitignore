@@ -3,3 +3,6 @@
 data/*
 saves/*
 .ipynb_checkpoints
+saves_results
+saves
+data
