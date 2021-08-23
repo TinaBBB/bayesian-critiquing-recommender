@@ -6,3 +6,5 @@ saves/*
 saves_results
 saves
 data
+*.tar
+*.pyc

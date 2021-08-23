@@ -44,12 +44,15 @@ class Trainer:
             # evaluate
             if (not self.skip_eval and epoch % 10 == 0) or (self.skip_eval and epoch == self.num_epochs):
                 if self.skip_eval:
-                    rec_score = self.evaluate(mse_only=False, ndcg_only=False)
+                    rec_score = self.evaluate(mse_only=True, ndcg_only=False)
                 else:
-                    rec_score = self.evaluate(mse_only=False, ndcg_only=True)
+                    rec_score = self.evaluate(mse_only=True, ndcg_only=True)
 
-                score = {"RMSE": rec_score['RMSE'],
-                         "NDCG": rec_score['NDCG'][0]}
+                score = {"RMSE": rec_score['RMSE']}
+
+                if 'NDCG' in rec_score.keys():
+                    score['NDCG'] = rec_score['NDCG'][0]
+
                 score_str = ' '.join(['%s=%.4f' % (m, score[m]) for m in score])
                 epoch_elapsed = time.time() - epoch_start
                 self.logger.info('[Epoch %3d/%3d, epoch time: %.2f, train_time: %.2f] loss = %.4f, %s' % (
