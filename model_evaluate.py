@@ -82,7 +82,7 @@ if __name__ == "__main__":
         experiment = Experiment(project_name=project_name)
         experiment.log_parameters(conf)
 
-        rmse, epoch, rec_score = fit(experiment, p.model_name, dataset, log_dir, device, skip_eval=False)
+        rmse, epoch, rec_score = fit(experiment, p.model_name, dataset, log_dir, device, skip_eval=True)
         experiment.log_metric("rmse", rmse)
         experiment.log_metric("epoch", epoch)
         experiment.log_others({
